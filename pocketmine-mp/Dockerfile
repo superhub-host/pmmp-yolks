@@ -4,7 +4,7 @@ LABEL maintainer="ruscalworld <me@ruscal.world>"
 ARG PMMP_MAJOR_VERSION=5
 ARG PHP_VERSION='php-8.1-latest'
 
-RUN apt update && apt install -y curl tar && \
+RUN apt update && apt install -y curl tar iproute2 && \
 	mkdir /tmp/php && \
 	curl --location --progress-bar https://github.com/pmmp/PHP-Binaries/releases/download/${PHP_VERSION}/PHP-Linux-x86_64-PM${PMMP_MAJOR_VERSION}.tar.gz | tar -xvz -C /tmp/php && \
 	mkdir /usr/php && \
