@@ -2,11 +2,11 @@ FROM debian:bullseye AS runner
 LABEL maintainer="ruscalworld <me@ruscal.world>"
 
 ARG PMMP_MAJOR_VERSION=5
-ARG PHP_VERSION='php-8.1-latest'
+ARG PHP_VERSION='8.1'
 
 RUN apt update && apt install -y curl tar iproute2 && \
 	mkdir /tmp/php && \
-	curl --location --progress-bar https://github.com/pmmp/PHP-Binaries/releases/download/${PHP_VERSION}/PHP-Linux-x86_64-PM${PMMP_MAJOR_VERSION}.tar.gz | tar -xvz -C /tmp/php && \
+	curl --location --progress-bar https://github.com/pmmp/PHP-Binaries/releases/download/pm${PMMP_MAJOR_VERSION}-php-${PHP_VERSION}-latest/PHP-${PHP_VERSION}-Linux-x86_64-PM${PMMP_MAJOR_VERSION}.tar.gz | tar -xvz -C /tmp/php && \
 	mkdir /usr/php && \
 	mv /tmp/php/bin/php7/* /usr/php && \
 	grep -q '^extension_dir' /usr/php/bin/php.ini && \
