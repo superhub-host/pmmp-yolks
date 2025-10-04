@@ -1,4 +1,4 @@
-FROM debian:bullseye AS runner
+FROM debian:bookworm AS runner
 LABEL maintainer="ruscalworld <me@ruscal.world>"
 
 ARG PMMP_MAJOR_VERSION=5
