@@ -11,15 +11,27 @@ on:
 
 jobs:
   push:
-    name: "PM${{ matrix.pmmp }} with PHP ${{ matrix.php }}"
+    name: "${{ matrix.tag }}"
     runs-on: ubuntu-latest
     strategy:
+      fail-fast: false
       matrix:
-        php: ['8.1', '8.2', '8.3']
-        pmmp: ['5']
         include:
-          - php: '8.1'
-            pmmp: '4'
+          # Original pmmp runtimes. Tags and build args are unchanged, so
+          # existing servers keep getting the same images.
+          - { tag: pm4-php8.1, php: '8.1', pmmp: '4' }
+          - { tag: pm5-php8.1, php: '8.1', pmmp: '5' }
+          - { tag: pm5-php8.2, php: '8.2', pmmp: '5' }
+          - { tag: pm5-php8.3, php: '8.3', pmmp: '5' }
+          - { tag: pm5-php8.4, php: '8.4', pmmp: '5' }
+          # Runtimes of PocketMine-MP forks that ship their own PHP binaries.
+          # AmberPM 1.7+ needs ext-rtc for NetherNet (Bedrock 26.60+).
+          - tag: amber-php8.4
+            binaries_repo: Amber-PM/PHP-Binaries
+            binaries_tag: amber-php-8.4.27-r5
+            binaries_file: PHP-8.4-Linux-x86_64-PM5.tar.gz
+            binaries_checksums: SHA256SUMS.txt
+            required_extensions: rtc
     steps:
       - uses: actions/checkout@v3
       - uses: docker/setup-qemu-action@v2
@@ -34,14 +46,19 @@ jobs:
       - uses: docker/metadata-action@v4
         id: meta  
         with:
-          tags: pm${{ matrix.pmmp }}-php${{ matrix.php }}
+          tags: ${{ matrix.tag }}
           images: ghcr.io/superhub-host/pmmp-yolks
       - uses: docker/build-push-action@v4
         with:
           context: ./pocketmine-mp
           push: ${{ github.event_name != 'pull_request' }}
           build-args: |
-            PHP_VERSION=${{ matrix.php }}
-            PMMP_MAJOR_VERSION=${{ matrix.pmmp }}
+            PHP_VERSION=${{ matrix.php || '8.1' }}
+            PMMP_MAJOR_VERSION=${{ matrix.pmmp || '5' }}
+            PHP_BINARIES_REPO=${{ matrix.binaries_repo || 'pmmp/PHP-Binaries' }}
+            PHP_BINARIES_TAG=${{ matrix.binaries_tag }}
+            PHP_BINARIES_FILE=${{ matrix.binaries_file }}
+            PHP_BINARIES_CHECKSUMS=${{ matrix.binaries_checksums }}
+            PHP_REQUIRED_EXTENSIONS=${{ matrix.required_extensions }}
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}
